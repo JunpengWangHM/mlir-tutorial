@@ -25,25 +25,27 @@ include(HandleLLVMOptions)
 
 include_directories(${LLVM_INCLUDE_DIRS} ${MLIR_INCLUDE_DIRS})
 
-add_executable(ex1-io ex1-io/ex1-io.cpp)
-target_link_libraries(
-  ex1-io
-  MLIRIR
-  MLIRParser
-  MLIRFuncDialect
-  MLIRArithDialect
-)
+# uncomment one ex each time to make
 
-add_executable(ex2-build ex2-build/ex2-build.cpp)
-target_link_libraries(
-  ex2-build
-  MLIRIR
-  MLIRParser
-  MLIRFuncDialect
-  MLIRArithDialect
-)
-
+# add_executable(ex1-io ex1-io/ex1-io.cpp)
+# target_link_libraries(
+#   ex1-io
+#   MLIRIR
+#   MLIRParser
+#   MLIRFuncDialect
+#   MLIRArithDialect
+# )
+# 
+# add_executable(ex2-build ex2-build/ex2-build.cpp)
+# target_link_libraries(
+#   ex2-build
+#   MLIRIR
+#   MLIRParser
+#   MLIRFuncDialect
+#   MLIRArithDialect
+# )
+# 
 # add_subdirectory(ex3-dialect)
 # add_subdirectory(ex4-beautiful-dialect)
 # add_subdirectory(ex5-pass)
-add_subdirectory(ex7-convert)
+# add_subdirectory(ex7-convert)

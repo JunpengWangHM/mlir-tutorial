@@ -427,7 +427,7 @@ int main(int argc, char ** argv) {
   OpBuilder builder(&ctx);
   auto mod = builder.create<ModuleOp>(builder.getUnknownLoc());
 
-  // 设置插入点
+  // 设置插入点，之后的 builder.create 操作将把创建的Op插入此处
   builder.setInsertionPointToEnd(mod.getBody());
 
   // 创建 func
@@ -439,10 +439,10 @@ int main(int argc, char ** argv) {
   auto entry = func.addEntryBlock();
   auto args = entry->getArguments();
 
-  // 设置插入点
+  // 把插入点设置在 func 中
   builder.setInsertionPointToEnd(entry);
 
-  // 创建 arith.addi
+  // 在 func 中创建 arith.addi
   auto addi = builder.create<arith::AddIOp>(builder.getUnknownLoc(), args[0], args[1]);
 
   // 创建 func.return
@@ -859,7 +859,8 @@ vscode 提供 mlir 扩展，可以为我们写 tablegen 文件提供帮助。在
     )
     ```
 
-11. 简单使用 `ninja toy-opt`
+11. 编译可执行文件  
+add_mlir_tool不会直接输出可执行文件，详见<https://github.com/KEKE046/mlir-tutorial/issues/2>，需要首先使用`cmake .. -GNinja -DCMAKE_INSTALL_PREFIX=/mlir-tutorial/install`在build目录下生成build.ninja文件，然后使用`ninja toy-opt`生成可执行文件。
     * `./toy-opt --help` 可以打文档，里面应该有 cse 和 canonicalize 两个 pass
     * `./toy-opt ../ex3-dialect/ex3.mlir` 读文件
     * `./toy-opt -canonicalize ../ex3-dialect/ex3-cse.mlir`，可以做 dce
@@ -931,6 +932,9 @@ LogicalResult SubOp::verify() {
   return success();
 }
 ```
+
+这里的`getRhs`和`getLhs`函数来自于tb文件中的`lhs`，`rhs`两个操作数。如果tb文件中改成`left_hand_side`，那么对应的函数就变成`getLeftHandSide`。
+TODO: 查找官方文档中关于变量名转换规则的说明。
 
 ####  7.2.1. <a name='emiterror'></a>emitError
 
@@ -1422,7 +1426,7 @@ std::unique_ptr<mlir::Pass> toy::createConvertToyToArithPass(
 }
 ```
 
-配置参数的方法：`ex5-opt -convert-toy-to-arith="name=xxx" ../ex5-pass/ex5.mlir`
+配置参数的方法：`./ex5-opt -convert-toy-to-arith="name=xxx" ../ex5-pass/ex5.mlir`
 
 ###  8.3. <a name='简单的-dce-pass-实现'></a>简单的 DCE Pass 实现
 
@@ -1490,6 +1494,7 @@ struct AddOpPat: OpRewritePattern<AddOp> {
   LogicalResult matchAndRewrite(AddOp op, PatternRewriter & rewriter) const {
     auto inputs = to_vector(op.getInputs());
     auto result = inputs[0];
+    // 将多个元素的加法操作变为多个两元素相加
     for(size_t i = 1; i< inputs.size(); i++) {
       result = rewriter.create<arith::AddIOp>(op->getLoc(), result, inputs[i]);
     }
